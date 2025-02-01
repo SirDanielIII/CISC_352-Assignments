@@ -7,8 +7,8 @@ satisfaction problems, planning, probabilistic inference, and neural networks.
 
 ### Contributors
 
-- **Daniel Frankel**
 - **Daniel Zhuo**
+- **Daniel Frankel**
 - **Max Godovanny**
 
 ## Assignments
