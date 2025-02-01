@@ -1,0 +1,20 @@
+Assignment 1: CSPs
+Welcome to the first assignment! You can find the description PDF attached, as well as the starter code ZIP file and some documentation for the main chunk of code you'll interface with. Any questions should be directed first and foremost to the forum, and if it's too personal in nature (i.e., would reveal your code), you can email the assignment TA listed on the onQ landing page.
+
+Acceptable Imports
+Python can pretty much do anything with the right import. This is why you aren't allowed to import random things for your assignment, since the problem may be trivially solvable. However, some functions are useful and kind of a pain to re-implement (and it also covers things we don't really care to teach/assess here). These are the only allowable imports (if you want something added to the list, you must reach out to the TA/prof to check):
+
+itertools.permutations
+itertools.product
+itertools.combination
+itertools.combination_with_replacement
+math.prod
+collections.deque
+collections.defaultdict
+operator.itemgetter
+
+Submission
+As mentioned in the assignment description, we will only accept zip files with the three specified Python files included. You can use the attached submit.py script to make sure this is in the right format for grading.
+
+Corrections / Updates
+(Jan 17) Added submit.py
