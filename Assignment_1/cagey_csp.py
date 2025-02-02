@@ -83,6 +83,7 @@ An example of a 3x3 puzzle would be defined as:
 
 """
 import itertools
+from math import prod
 
 from cspbase import *
 
@@ -160,24 +161,50 @@ def cagey_csp_model(cagey_grid):
         column = [grid_vars[j][i] for j in range(n)]
         csp.add_constraint(Constraint(f'AllDiff_Row({i + 1})', row))
         csp.add_constraint(Constraint(f'AllDiff_Column({i + 1})', column))
-    # Add the cage constraints
-    cage_variables = []  # Store additional variables for cages
+    # Flatten so far
+    var_array = [v for row in grid_vars for v in row]
     for value, cells, operator in cages:
-        cage_variables = [grid_vars[r - 1][c - 1] for r, c in cells]  # Need to do -1 for zero-based indexing since the cages in cagey_grid are one-based indexing
-        cage_var = Variable(f'Cage_op({value}:{operator}:{cells})', [value])  # Create a new cage variable
+        # Assign domain for cage variable
+        if operator is None or operator == '?':
+            op_domain = ['+', '-', '*', '/']
+            op_str = '?'
+        else:
+            op_domain = [operator]
+            op_str = operator
+        # We want something like "Cage_op(6:+:[Var-Cell(1,1), Var-Cell(1,2), Var-Cell(2,1), Var-Cell(2,2)])"
+        cell_names_str = ", ".join(f"Var-Cell({r},{c})" for (r, c) in cells)
+        cage_var_name = f"Cage_op({value}:{op_str}:[{cell_names_str}])"
+        cage_var = Variable(cage_var_name, op_domain)
         csp.add_var(cage_var)
-        c = Constraint(f'Cage({cells})', cage_variables + [cage_var])  # Include cage variable in scope
+        var_array.append(cage_var)
+        # Build the scope: [cage_var] + the cell variables
+        cage_cells = [grid_vars[r - 1][c - 1] for (r, c) in cells]  # -1 for zero-based indexing (cages are one-based indexing)
+        scope = [cage_var] + cage_cells
+        # Build the Constraint
+        con = Constraint(f"Cage({cells})", scope)
         # Generate satisfying tuples
         valid_tuples = []
-        for tup in itertools.product(*[var.domain() for var in cage_variables]):
-            if operator == "-" and len(tup) == 2:
-                if abs(tup[0] - tup[1]) == value:
-                    valid_tuples.append(tup + (value,))
-            elif operator == "/" and len(tup) == 2:
-                if (tup[0] / tup[1] == value) or (tup[1] / tup[0] == value):
-                    valid_tuples.append(tup + (value,))
-            elif eval(operator.join(map(str, tup))) == value:
-                valid_tuples.append(tup + (value,))
-        c.add_satisfying_tuples(valid_tuples)
-        csp.add_constraint(c)
-    return csp, grid_vars
+        combos = itertools.product(*[v.domain() for v in cage_cells])  # The asterisk * unpacks the list of lists into separate arguments
+        for combo in combos:
+            for op in op_domain:
+                k = len(combo)
+                if op == '+':
+                    if sum(combo) == value:
+                        valid_tuples.append((op,) + combo)
+                elif op == '*':
+                    if prod(combo) == value:
+                        valid_tuples.append((op,) + combo)
+                elif op == '-':
+                    if k == 2:  # 2-cell only
+                        if abs(combo[0] - combo[1]) == value:
+                            valid_tuples.append((op,) + combo)
+                elif op == '/':
+                    if k == 2:  # 2-cell only
+                        x1, x2 = combo
+                        if x2 != 0 and (x1 / x2) == value:
+                            valid_tuples.append((op, x1, x2))
+                        elif x1 != 0 and (x2 / x1) == value:
+                            valid_tuples.append((op, x1, x2))
+        con.add_satisfying_tuples(valid_tuples)
+        csp.add_constraint(con)
+    return csp, var_array
