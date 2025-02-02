@@ -1,7 +1,7 @@
 # =============================
-# Student Names:
-# Group ID:
-# Date:
+# Student Names: Daniel Zhuo, Daniel Frankel, Max Godovanny
+# Group ID: 31
+# Date: 2025-02-02
 # =============================
 # CISC 352 - W23
 # propagators.py
@@ -9,19 +9,19 @@
 #
 
 
-#Look for #IMPLEMENT tags in this file. These tags indicate what has
-#to be implemented to complete problem solution.
+# Look for #IMPLEMENT tags in this file. These tags indicate what has
+# to be implemented to complete problem solution.
 
 '''This file will contain different constraint propagators to be used within
    bt_search.
 
     1. prop_FC (worth 0.5/3 marks)
-        - a propagator function that propagates according to the FC algorithm that 
-          check constraints that have exactly one Variable in their scope that has 
+        - a propagator function that propagates according to the FC algorithm that
+          check constraints that have exactly one Variable in their scope that has
           not assigned with a value, and prune appropriately
 
     2. prop_GAC (worth 0.5/3 marks)
-        - a propagator function that propagates according to the GAC algorithm, as 
+        - a propagator function that propagates according to the GAC algorithm, as
           covered in lecture
 
    propagator == a function with the following template
@@ -80,6 +80,7 @@
          for gac we initialize the GAC queue with all constraints containing V.
    '''
 
+
 def prop_BT(csp, newVar=None):
     '''Do plain backtracking propagation. That is, do no
     propagation at all. Just check fully instantiated constraints'''
@@ -96,17 +97,51 @@ def prop_BT(csp, newVar=None):
                 return False, []
     return True, []
 
+
 def prop_FC(csp, newVar=None):
-    '''Do forward checking. That is check constraints with
+    """Do forward checking. That is check constraints with
        only one uninstantiated Variable. Remember to keep
-       track of all pruned Variable,value pairs and return '''
-    #IMPLEMENT
-    pass
+       track of all pruned Variable,value pairs and return """
+    # IMPLEMENT
+    pruned = []  # Store pruned (variable, value) pairs
+    constraints = csp.get_cons_with_var(newVar) if newVar else csp.get_all_cons()
+    for constraint in constraints:
+        for variable in constraint.get_scope():
+            if variable.is_assigned():
+                continue  # Skip assigned variables
+            domain_values = variable.cur_domain()[:]  # Grab a static snapshot of the list for when we iterate
+            for value in domain_values:
+                if not constraint.has_support(variable, value):
+                    variable.prune_value(value)  # No support means PRUNE
+                    pruned.append((variable, value))
+                    if variable.cur_domain_size() == 0:  # Domain wipe-out
+                        return False, pruned
+    return True, pruned
 
 
 def prop_GAC(csp, newVar=None):
-    '''Do GAC propagation. If newVar is None we do initial GAC enforce
+    """Do GAC propagation. If newVar is None we do initial GAC enforce
        processing all constraints. Otherwise we do GAC enforce with
-       constraints containing newVar on GAC Queue'''
-    #IMPLEMENT
-    pass
+       constraints containing newVar on GAC Queue"""
+    # IMPLEMENT
+    pruned = []  # Store pruned (variable, value) pairs
+    queue = csp.get_cons_with_var(newVar) if newVar else csp.get_all_cons()
+
+    while queue:
+        constraint = queue.pop(0)
+        for variable in constraint.get_scope():
+            if variable.is_assigned():
+                continue  # Skip assigned variables
+            domain_values = variable.cur_domain()[:]  # Grab a static snapshot of the list for when we iterate
+            for value in domain_values:
+                if not constraint.has_support(variable, value):
+                    variable.prune_value(value)  # No support means PRUNE
+                    pruned.append((variable, value))
+                    if variable.cur_domain_size() == 0:  # Domain wipe-out
+                        return False, pruned
+                    # If we did prune something, re-add the constraints that include variable
+                    for cons in csp.get_cons_with_var(variable):
+                        if cons not in queue:
+                            queue.append(cons)
+
+    return True, pruned

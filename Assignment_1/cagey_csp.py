@@ -1,7 +1,7 @@
 # =============================
-# Student Names:
-# Group ID:
-# Date:
+# Student Names: Daniel Zhuo, Daniel Frankel, Max Godovanny
+# Group ID: 31
+# Date: 2025-02-02
 # =============================
 # CISC 352 - W23
 # cagey_csp.py
@@ -9,7 +9,7 @@
 #
 
 #Look for #IMPLEMENT tags in this file.
-'''
+"""
 All models need to return a CSP object, and a list of lists of Variable objects
 representing the board. The returned list of lists is used to access the
 solution.
@@ -39,7 +39,7 @@ should fall after that (i.e., the cage operand variables, if required).
       constraints.
 
 
-Cagey Grids are addressed as follows (top number represents how the grid cells are adressed in grid definition tuple);
+Cagey Grids are addressed as follows (top number represents how the grid cells are addressed in grid definition tuple);
 (bottom number represents where the cell would fall in the var_array):
 +-------+-------+-------+-------+
 |  1,1  |  1,2  |  ...  |  1,n  |
@@ -81,19 +81,103 @@ op - a flag containing the operation used in the cage (None if unknown)
 An example of a 3x3 puzzle would be defined as:
 (3, [(3,[(1,1), (2,1)],"+"),(1, [(1,2)], '?'), (8, [(1,3), (2,3), (2,2)], "+"), (3, [(3,1)], '?'), (3, [(3,2), (3,3)], "+")])
 
-'''
+"""
+import itertools
 
 from cspbase import *
 
+
 def binary_ne_grid(cagey_grid):
     ##IMPLEMENT
-    pass
-
+    n = cagey_grid[0]  # Grid size is from the first element in cagey_grid
+    csp = CSP("Cagey_Grid-BinaryNE")
+    # Create 2D list storing variables for each cell in the (n x n) grid, with each of the domains being {1, 2, ..., n}.
+    grid_vars = [[Variable(f'{i + 1},{j + 1}', list(range(1, n + 1))) for j in range(n)] for i in range(n)]
+    # Add variables into the CSP
+    for row in grid_vars:
+        for variable in row:
+            csp.add_var(variable)
+    # Add the binary not-equal constraints for rows
+    for i in range(n):
+        for j in range(n):
+            for k in range(j + 1, n):  # Need to do this to ensure unique values in each row
+                c = Constraint(f"NotEqual_Row{i + 1},{j + 1})-({i + 1},{k + 1})", [grid_vars[i][j], grid_vars[i][k]])
+                # Generate all possible pairs (a, b) where a and b are in {1, ..., n},
+                # and only include pairs where a != b, which ensures that two cells in the same row cannot have the same value.
+                c.add_satisfying_tuples([(a, b) for a in range(1, n + 1) for b in range(1, n + 1) if a != b])
+                csp.add_constraint(c)
+    # Add binary not-equal constraints for columns
+    for j in range(n):
+        for i in range(n):
+            for k in range(i + 1, n):  # Need to do this to ensure unique values in each column
+                c = Constraint(f'NotEqual_Column({i + 1},{j + 1})-({k + 1},{j + 1})', [grid_vars[i][j], grid_vars[k][j]])
+                # Generate all possible pairs (a, b) where a and b are in {1, ..., n},
+                # and only include pairs where a != b, which ensures that two cells in the same column cannot have the same value.
+                c.add_satisfying_tuples([(a, b) for a in range(1, n + 1) for b in range(1, n + 1) if a != b])
+                csp.add_constraint(c)
+    return csp, grid_vars
 
 def nary_ad_grid(cagey_grid):
     ## IMPLEMENT
-    pass
+    n = cagey_grid[0]  # Grid size is from the first element in cagey_grid
+    csp = CSP("Cagey_Grid-NaryAllDiff")
+    # Create 2D list storing variables for each cell in the (n x n) grid, with each of the domains being {1, 2, ..., n}.
+    grid_vars = [[Variable(f'{i + 1},{j + 1}', list(range(1, n + 1))) for j in range(n)] for i in range(n)]
+    # Add variables into the CSP
+    for row in grid_vars:
+        for variable in row:
+            csp.add_var(variable)
+    # Add n-ary all-different constraints for rows
+    for i in range(n):
+        row = grid_vars[i]
+        c = Constraint(f"AllDiff_Row({i + 1})", row)
+        # Generate all possible permutations (a, b) where a and b are in {1, ..., n}
+        c.add_satisfying_tuples([tup for tup in itertools.permutations(range(1, n + 1), n)])
+        csp.add_constraint(c)
+    # Add n-ary all-different constraints for columns
+    for j in range(n):
+        column = [grid_vars[i][j] for i in range(n)]
+        c = Constraint(f'AllDiff_Column({j + 1})', column)
+        # Generate all possible permutations (a, b) where a and b are in {1, ..., n}
+        satisfying_tuples = [tup for tup in itertools.permutations(range(1, n + 1), n)]
+        c.add_satisfying_tuples(satisfying_tuples)
+        csp.add_constraint(c)
+    return csp, grid_vars
 
 def cagey_csp_model(cagey_grid):
     ##IMPLEMENT
-    pass
+    n, cages = cagey_grid  # Extract grid size and cages
+    csp = CSP("Cagey_Grid-CSP")
+    # Create 2D list storing variables for each cell in the (n x n) grid, with each of the domains being {1, 2, ..., n}.
+    grid_vars = [[Variable(f'{i + 1},{j + 1}', list(range(1, n + 1))) for j in range(n)] for i in range(n)]
+    # Add variables into the CSP
+    for row in grid_vars:
+        for variable in row:
+            csp.add_var(variable)
+    # Add row/column uniqueness using n-ary all-different
+    for i in range(n):
+        row = grid_vars[i]
+        column = [grid_vars[j][i] for j in range(n)]
+        csp.add_constraint(Constraint(f'AllDiff_Row({i + 1})', row))
+        csp.add_constraint(Constraint(f'AllDiff_Column({i + 1})', column))
+    # Add the cage constraints
+    cage_variables = []  # Store additional variables for cages
+    for value, cells, operator in cages:
+        cage_variables = [grid_vars[r - 1][c - 1] for r, c in cells]  # Need to do -1 for zero-based indexing since the cages in cagey_grid are one-based indexing
+        cage_var = Variable(f'Cage_op({value}:{operator}:{cells})', [value])  # Create a new cage variable
+        csp.add_var(cage_var)
+        c = Constraint(f'Cage({cells})', cage_variables + [cage_var])  # Include cage variable in scope
+        # Generate satisfying tuples
+        valid_tuples = []
+        for tup in itertools.product(*[var.domain() for var in cage_variables]):
+            if operator == "-" and len(tup) == 2:
+                if abs(tup[0] - tup[1]) == value:
+                    valid_tuples.append(tup + (value,))
+            elif operator == "/" and len(tup) == 2:
+                if (tup[0] / tup[1] == value) or (tup[1] / tup[0] == value):
+                    valid_tuples.append(tup + (value,))
+            elif eval(operator.join(map(str, tup))) == value:
+                valid_tuples.append(tup + (value,))
+        c.add_satisfying_tuples(valid_tuples)
+        csp.add_constraint(c)
+    return csp, grid_vars
