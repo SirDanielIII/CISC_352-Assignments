@@ -104,7 +104,10 @@ def prop_FC(csp, newVar=None):
        track of all pruned Variable,value pairs and return """
     # IMPLEMENT
     pruned = []  # Store pruned (variable, value) pairs
-    constraints = csp.get_cons_with_var(newVar) if newVar else csp.get_all_cons()
+    if newVar:
+       constraints = csp.get_cons_with_var(newVar)
+    else: 
+       constraints = csp.get_all_cons()
     for constraint in constraints:
         for variable in constraint.get_scope():
             if variable.is_assigned():
@@ -125,7 +128,10 @@ def prop_GAC(csp, newVar=None):
        constraints containing newVar on GAC Queue"""
     # IMPLEMENT
     pruned = []  # Store pruned (variable, value) pairs
-    queue = csp.get_cons_with_var(newVar) if newVar else csp.get_all_cons()
+    if newVar:
+       queue = csp.get_cons_with_var(newVar)  
+    else: 
+       queue = csp.get_all_cons()
 
     while queue:
         constraint = queue.pop(0)
