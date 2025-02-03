@@ -8,7 +8,7 @@
 # desc:
 #
 
-#Look for #IMPLEMENT tags in this file.
+# Look for #IMPLEMENT tags in this file.
 """
 All models need to return a CSP object, and a list of lists of Variable objects
 representing the board. The returned list of lists is used to access the
@@ -118,6 +118,7 @@ def binary_ne_grid(cagey_grid):
                 csp.add_constraint(c)
     return csp, grid_vars
 
+
 def nary_ad_grid(cagey_grid):
     ## IMPLEMENT
     n = cagey_grid[0]  # Grid size is from the first element in cagey_grid
@@ -144,6 +145,7 @@ def nary_ad_grid(cagey_grid):
         c.add_satisfying_tuples(satisfying_tuples)
         csp.add_constraint(c)
     return csp, grid_vars
+
 
 def cagey_csp_model(cagey_grid):
     ##IMPLEMENT
@@ -187,21 +189,25 @@ def cagey_csp_model(cagey_grid):
         combos = itertools.product(*[v.domain() for v in cage_cells])  # The asterisk * unpacks the list of lists into separate arguments
         for combo in combos:
             for op in op_domain:
-                k = len(combo)
+                k = len(combo)  # Number of cells in the cage
+                # Addition constraint: sum of values must equal the target value
                 if op == '+':
                     if sum(combo) == value:
                         valid_tuples.append((op,) + combo)
+                # Multiplication constraint: product of values must equal the target value
                 elif op == '*':
                     if prod(combo) == value:
                         valid_tuples.append((op,) + combo)
+                # Subtraction constraint: only valid for two-cell cages
                 elif op == '-':
-                    if k == 2:  # 2-cell only
+                    if k == 2:
                         if abs(combo[0] - combo[1]) == value:
                             valid_tuples.append((op,) + combo)
+                # Division constraint: only valid for two-cell cages
                 elif op == '/':
-                    if k == 2:  # 2-cell only
+                    if k == 2:
                         x1, x2 = combo
-                        if x2 != 0 and (x1 / x2) == value:
+                        if x2 != 0 and (x1 / x2) == value:  # Ensure division is valid
                             valid_tuples.append((op, x1, x2))
                         elif x1 != 0 and (x2 / x1) == value:
                             valid_tuples.append((op, x1, x2))
