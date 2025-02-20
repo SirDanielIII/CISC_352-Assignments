@@ -37,3 +37,13 @@ This assignment focuses on **Constraint Satisfaction Problems (CSPs)** and requi
 3. Run the **autograder** to validate your implementation:
    ```bash
    python3 autograder_stu.py
+
+## Grading Breakdown
+
+| Component                                              | Weight |
+|--------------------------------------------------------|--------|
+| **Constraint Propagation (FC & GAC)**                  | 1.25%  |
+| **Variable Ordering (MRV & DH)**                       | 0.5%   |
+| **CSP Models (Binary, N-ary, Full Cagey)**             | 1.0%   |
+| **Code Readability (structure, comments, formatting)** | 0.25%  |
+| **Total**                                              | 3%     |
