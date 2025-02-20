@@ -1,4 +1,5 @@
-Daniel Frankel
+Daniel Frankel, 20357197, 21DMF9
+
 Daniel Frankel was responsible for the enitre demain.pddl file. Daniel created all of the constraints, and wrote code for all the "IMPLEMENT ME" sections in that file, writing the preconditions and effects for each scenario in the The Treasure Hunter game.
 
 Daniel Zhuo, 20350725, 21DZ23
