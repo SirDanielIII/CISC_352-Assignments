@@ -1,8 +1,9 @@
 Daniel Frankel
-- Yeet
+Daniel Frankel was responsible for the enitre demain.pddl file. Daniel created all of the constraints, and wrote code for all the "IMPLEMENT ME" sections in that file, writing the preconditions and effects for each scenario in the The Treasure Hunter game.
 
 Daniel Zhuo, 20350725, 21DZ23
-- Yeet
+Daniel Zhou was responsible for working on the p03.pddl and p04.pddl files. Daniel wrote the entire implmentation for problem 3 and created the new "difficult" problem in the p04.pddl and provided the implementation for it as well.
 
-Max Godovanny
-- Yeet
+Max Godovanny, 20341224, 21MG95
+Maxim Godovanny was responsible for working on the p01.pddl and p02.pddl files. Maxim wrote the entire implmentations for both problem 1 and 2 in for The Treasure hunter game.
+
