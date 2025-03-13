@@ -1,0 +1,8 @@
+Daniel Frankel, 20357197, 21DMF9
+Daniel Frankel was responsible for completing questions 2 and 3, which consisted of the observeUpdate function and get getObservationProb function in solutions.py
+
+Daniel Zhuo, 20350725, 21DZ23
+Daniel Zhuo was responsible for completing the normalize and sample functions for question 1 in solutions.py. 
+
+Max Godovanny, 20341224, 21MG95
+Maxim Godovanny was responsible for completing question 4 and 5, which consisted of the implmementation of the chooseAction function in busterAgents.py and elapseTime function in solutions.py
