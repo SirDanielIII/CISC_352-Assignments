@@ -39,7 +39,7 @@ class PerceptronModel(object):
         if nn.as_scalar(self.run(self.x_point)) >= 0:
             return 1
         else:
-            return 0
+            return -1
 
     def train_model(self, dataset):
         """
