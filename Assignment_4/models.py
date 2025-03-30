@@ -1,5 +1,6 @@
 import nn
 
+
 class PerceptronModel(object):
     def __init__(self, dim):
         """
@@ -46,11 +47,19 @@ class PerceptronModel(object):
         Train the perceptron until convergence.
         """
         "*** YOUR CODE HERE ***"
-        parameter = nn.Parameter(dataset)
-        direction = nn.Node()
-        multiplier = nn.as_scalar(direction)
-        while dataset.get_validation_accuracy() != 1:
-            parameter.update(multiplier, direction)
+        # Keep training until a full pass results in no misclassifications.
+        while True:
+            no_mistakes = True
+            for x, y in dataset.iterate_once(1):
+                # Convert the target from the Constant node into a Python scalar.
+                true_label = nn.as_scalar(y)
+                # If the prediction doesn't match the true label, update the weights.
+                if self.get_prediction(x) != true_label:
+                    self.w.update(true_label, x)
+                    no_mistakes = False
+            # If we made no mistakes during the pass, training is complete.
+            if no_mistakes:
+                break
 
 
 class RegressionModel(object):
@@ -59,6 +68,7 @@ class RegressionModel(object):
     numbers to real numbers. The network should be sufficiently large to be able
     to approximate sin(x) on the interval [-2pi, 2pi] to reasonable precision.
     """
+
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
@@ -92,6 +102,7 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE ***"
 
+
 class DigitClassificationModel(object):
     """
     A model for handwritten digit classification using the MNIST dataset.
@@ -106,6 +117,7 @@ class DigitClassificationModel(object):
     methods here. We recommend that you implement the RegressionModel before
     working on this part of the project.)
     """
+
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
@@ -146,4 +158,3 @@ class DigitClassificationModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
-
