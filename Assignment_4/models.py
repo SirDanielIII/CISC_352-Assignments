@@ -72,6 +72,15 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        # 2-hidden-layer net, each hidden layer has size 50
+        self.w1 = nn.Parameter(1, 50)  # input_dim=1 → hidden_dim=50
+        self.b1 = nn.Parameter(1, 50)
+
+        self.w2 = nn.Parameter(50, 50)
+        self.b2 = nn.Parameter(1, 50)
+
+        self.w3 = nn.Parameter(50, 1)  # hidden_dim=50 → output_dim=1
+        self.b3 = nn.Parameter(1, 1)
 
     def run(self, x):
         """
@@ -83,6 +92,21 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+        # x is (batch_size x 1)
+        # 1) First linear layer + ReLU
+        h1 = nn.Linear(x, self.w1)  # shape: (batch_size x 50)
+        h1 = nn.AddBias(h1, self.b1)  # shape: (batch_size x 50)
+        h1 = nn.ReLU(h1)  # shape: (batch_size x 50)
+
+        # 2) Second linear layer + ReLU
+        h2 = nn.Linear(h1, self.w2)  # shape: (batch_size x 50)
+        h2 = nn.AddBias(h2, self.b2)  # shape: (batch_size x 50)
+        h2 = nn.ReLU(h2)  # shape: (batch_size x 50)
+
+        # 3) Final linear transform (output)
+        y_pred = nn.Linear(h2, self.w3)  # shape: (batch_size x 1)
+        y_pred = nn.AddBias(y_pred, self.b3)  # shape: (batch_size x 1)
+        return y_pred
 
     def get_loss(self, x, y):
         """
@@ -95,12 +119,40 @@ class RegressionModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        # Predict
+        y_prediction = self.run(x)
+        # Return a square loss node
+        return nn.SquareLoss(y_prediction, y)
 
     def train_model(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        batch_size = 10
+        learning_rate = 0.01
+
+        while True:
+            for x_batch, y_batch in dataset.iterate_once(batch_size):
+                loss = self.get_loss(x_batch, y_batch)
+                grads = nn.gradients([self.w1, self.b1,
+                                      self.w2, self.b2,
+                                      self.w3, self.b3],
+                                     loss)
+                # Perform gradient updates
+                for param, grad in zip([self.w1, self.b1,
+                                        self.w2, self.b2,
+                                        self.w3, self.b3],
+                                       grads):
+                    param.update(-learning_rate, grad)
+
+            # After going through one full pass, you can check the loss
+            # on the entire training set:
+            total_loss = nn.as_scalar(
+                self.get_loss(nn.Constant(dataset.x),
+                              nn.Constant(dataset.y)))
+            if total_loss < 0.02:
+                return  # WE DID ITTTT
 
 
 class DigitClassificationModel(object):
