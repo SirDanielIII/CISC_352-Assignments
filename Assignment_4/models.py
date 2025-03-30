@@ -52,6 +52,7 @@ class PerceptronModel(object):
         while dataset.get_validation_accuracy() != 1:
             parameter.update(multiplier, direction)
 
+
 class RegressionModel(object):
     """
     A neural network model for approximating a function that maps from real
