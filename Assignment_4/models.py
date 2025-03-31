@@ -47,17 +47,17 @@ class PerceptronModel(object):
         Train the perceptron until convergence.
         """
         "*** YOUR CODE HERE ***"
-        # Keep training until a full pass results in no misclassifications.
+        # Keep training until there are no mistakes.
         while True:
             no_mistakes = True
             for x, y in dataset.iterate_once(1):
                 # Convert the target from the Constant node into a Python scalar.
                 true_label = nn.as_scalar(y)
-                # If the prediction doesn't match the true label, update the weights.
+                # If the prediction doesn't match the true label, then update the weights.
                 if self.get_prediction(x) != true_label:
                     self.w.update(true_label, x)
                     no_mistakes = False
-            # If we made no mistakes during the pass, training is complete.
+            # If there were no mistakes made during the pass, the training is complete.
             if no_mistakes:
                 break
 
@@ -73,13 +73,13 @@ class RegressionModel(object):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
         # 2-hidden-layer net, each hidden layer has size 50
-        self.w1 = nn.Parameter(1, 50)  # input_dim=1 → hidden_dim=50
+        self.w1 = nn.Parameter(1, 50)  
         self.b1 = nn.Parameter(1, 50)
 
         self.w2 = nn.Parameter(50, 50)
         self.b2 = nn.Parameter(1, 50)
 
-        self.w3 = nn.Parameter(50, 1)  # hidden_dim=50 → output_dim=1
+        self.w3 = nn.Parameter(50, 1)  
         self.b3 = nn.Parameter(1, 1)
 
     def run(self, x):
@@ -93,17 +93,17 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE ***"
         # x is (batch_size x 1)
-        # 1) First linear layer + ReLU
+        # 1) First linear layer and ReLU function
         h1 = nn.Linear(x, self.w1)  # shape: (batch_size x 50)
         h1 = nn.AddBias(h1, self.b1)  # shape: (batch_size x 50)
         h1 = nn.ReLU(h1)  # shape: (batch_size x 50)
 
-        # 2) Second linear layer + ReLU
+        # 2) Second linear layer and ReLU functon
         h2 = nn.Linear(h1, self.w2)  # shape: (batch_size x 50)
         h2 = nn.AddBias(h2, self.b2)  # shape: (batch_size x 50)
         h2 = nn.ReLU(h2)  # shape: (batch_size x 50)
 
-        # 3) Final linear transform (output)
+        # 3) Final linear transform 
         y_pred = nn.Linear(h2, self.w3)  # shape: (batch_size x 1)
         y_pred = nn.AddBias(y_pred, self.b3)  # shape: (batch_size x 1)
         return y_pred
@@ -134,6 +134,7 @@ class RegressionModel(object):
 
         while True:
             for x_batch, y_batch in dataset.iterate_once(batch_size):
+                # gets loss and gradients
                 loss = self.get_loss(x_batch, y_batch)
                 grads = nn.gradients([self.w1, self.b1,
                                       self.w2, self.b2,
@@ -183,7 +184,7 @@ class DigitClassificationModel(object):
         self.w3 = nn.Parameter(300, 300)
         self.b3 = nn.Parameter(1, 300)
 
-        # Output layer: 10 classes
+        # Output layer
         self.w4 = nn.Parameter(300, 10)
         self.b4 = nn.Parameter(1, 10)
 
@@ -246,7 +247,7 @@ class DigitClassificationModel(object):
         "*** YOUR CODE HERE ***"
         batch_size = 200
         learning_rate = 0.1
-        max_epochs = 30
+        max_epochs = 25
 
         params = [self.w1, self.b1,
                   self.w2, self.b2,
@@ -257,34 +258,34 @@ class DigitClassificationModel(object):
         epochs_since_improvement = 0
 
         for epoch in range(max_epochs):
-            # One epoch (pass) over the training set
+            # One epoch over the training set
             for x_batch, y_batch in dataset.iterate_once(batch_size):
                 loss = self.get_loss(x_batch, y_batch)
                 grads = nn.gradients(params, loss)
-                # Gradient update
+                # performs Gradient update
                 for p, g in zip(params, grads):
                     p.update(-learning_rate, g)
 
             # Check validation accuracy
             dev_acc = dataset.get_validation_accuracy()
-            print(f"Epoch {epoch + 1}, LR={learning_rate}, Dev accuracy={dev_acc:.4%}")
+            print(f"Epoch {epoch + 1}, Learning Rate={learning_rate}, Dev accuracy={dev_acc:.4%}")
 
             # If we improved, reset stagnation counter
             if dev_acc > best_dev_acc:
                 best_dev_acc = dev_acc
                 epochs_since_improvement = 0
             else:
-                # No improvement => increment counter
+                # if No improvement, increment the counter
                 epochs_since_improvement += 1
 
-            # If we’re at or above 98%, or no improvement for a while => adjust
+            # If we’re at or above 98% break out of loop
             if dev_acc >= 0.98:
                 print("Reached 98% (or more) validation accuracy.")
                 break
 
-            # If no improvement over ~2 epochs, reduce LR & reset
+            # If no improvement over 2 epochs, reduce the Learning date and ret counter
             if epochs_since_improvement >= 2:
                 learning_rate *= 0.5
                 epochs_since_improvement = 0
 
-        print(f"Final validation accuracy: {best_dev_acc:.4%}")
+        print(f"Final validation accuracy: {best_dev_acc}")
