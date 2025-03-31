@@ -72,8 +72,8 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-        # 2-hidden-layer net, each hidden layer has size 50
-        self.w1 = nn.Parameter(1, 50)  
+        # network with an input layer and 2 hidden layer, with each layer having a size of 50
+        self.w1 = nn.Parameter(1, 50)
         self.b1 = nn.Parameter(1, 50)
 
         self.w2 = nn.Parameter(50, 50)
@@ -93,17 +93,17 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE ***"
         # x is (batch_size x 1)
-        # 1) First linear layer and ReLU function
+        # 1) First linear layer and applying ReLU function
         h1 = nn.Linear(x, self.w1)  # shape: (batch_size x 50)
         h1 = nn.AddBias(h1, self.b1)  # shape: (batch_size x 50)
         h1 = nn.ReLU(h1)  # shape: (batch_size x 50)
 
-        # 2) Second linear layer and ReLU functon
+        # 2) Second linear layer and applying ReLU functon
         h2 = nn.Linear(h1, self.w2)  # shape: (batch_size x 50)
         h2 = nn.AddBias(h2, self.b2)  # shape: (batch_size x 50)
         h2 = nn.ReLU(h2)  # shape: (batch_size x 50)
 
-        # 3) Final linear transform 
+        # 3) Final linear transformation
         y_pred = nn.Linear(h2, self.w3)  # shape: (batch_size x 1)
         y_pred = nn.AddBias(y_pred, self.b3)  # shape: (batch_size x 1)
         return y_pred
@@ -147,7 +147,7 @@ class RegressionModel(object):
                                        grads):
                     param.update(-learning_rate, grad)
 
-            # After going through one full pass, you can check the loss
+            # After going through one full pass, check the loss
             # on the entire training set:
             total_loss = nn.as_scalar(
                 self.get_loss(nn.Constant(dataset.x),
@@ -203,22 +203,22 @@ class DigitClassificationModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
-        # Layer 1
-        h1 = nn.Linear(x, self.w1)  # (batch_size x 300)
-        h1 = nn.AddBias(h1, self.b1)  # (batch_size x 300)
-        h1 = nn.ReLU(h1)  # (batch_size x 300)
+        # Layer 1 (batch_size x 300)
+        h1 = nn.Linear(x, self.w1)
+        h1 = nn.AddBias(h1, self.b1)
+        h1 = nn.ReLU(h1)
 
-        # Layer 2
-        h2 = nn.Linear(h1, self.w2)  # (batch_size x 300)
-        h2 = nn.AddBias(h2, self.b2)  # (batch_size x 300)
-        h2 = nn.ReLU(h2)  # (batch_size x 300)
+        # Layer 2 (batch_size x 300)
+        h2 = nn.Linear(h1, self.w2)
+        h2 = nn.AddBias(h2, self.b2)
+        h2 = nn.ReLU(h2)
 
-        # Layer 3
-        h3 = nn.Linear(h2, self.w3)  # (batch_size x 300)
-        h3 = nn.AddBias(h3, self.b3)  # (batch_size x 300)
-        h3 = nn.ReLU(h3)  # (batch_size x 300)
+        # Layer 3 (batch_size x 300)
+        h3 = nn.Linear(h2, self.w3)
+        h3 = nn.AddBias(h3, self.b3)
+        h3 = nn.ReLU(h3)
 
-        # Output logits
+        # Output scores
         logits = nn.Linear(h3, self.w4)  # (batch_size x 10)
         logits = nn.AddBias(logits, self.b4)
         return logits
@@ -248,7 +248,7 @@ class DigitClassificationModel(object):
         batch_size = 200
         learning_rate = 0.1
         max_epochs = 25
-
+        # parameters which include all the weights and biases
         params = [self.w1, self.b1,
                   self.w2, self.b2,
                   self.w3, self.b3,
@@ -259,14 +259,14 @@ class DigitClassificationModel(object):
 
         for epoch in range(max_epochs):
             # One epoch over the training set
-            for x_batch, y_batch in dataset.iterate_once(batch_size):
+            for x_batch, y_batch in dataset.iterate_once(batch_size): # calculates loss and grads for each batch in the data set
                 loss = self.get_loss(x_batch, y_batch)
                 grads = nn.gradients(params, loss)
-                # performs Gradient update
+                # performs the Gradient update
                 for p, g in zip(params, grads):
                     p.update(-learning_rate, g)
 
-            # Check validation accuracy
+            # Checks validation accuracy
             dev_acc = dataset.get_validation_accuracy()
             print(f"Epoch {epoch + 1}, Learning Rate={learning_rate}, Dev accuracy={dev_acc:.4%}")
 
@@ -275,7 +275,7 @@ class DigitClassificationModel(object):
                 best_dev_acc = dev_acc
                 epochs_since_improvement = 0
             else:
-                # if No improvement, increment the counter
+                # if there is No improvement, increment the counter
                 epochs_since_improvement += 1
 
             # If we’re at or above 98% break out of loop
@@ -283,7 +283,7 @@ class DigitClassificationModel(object):
                 print("Reached 98% (or more) validation accuracy.")
                 break
 
-            # If no improvement over 2 epochs, reduce the Learning date and ret counter
+            # If no improvement over 2 epochs, reduce the Learning date and reset the counter
             if epochs_since_improvement >= 2:
                 learning_rate *= 0.5
                 epochs_since_improvement = 0
